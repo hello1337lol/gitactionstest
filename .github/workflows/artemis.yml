@@ -28,36 +28,18 @@ jobs:
         run: |
           echo "timestamp=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
 
-      - name: Send Discord Embed (Online)
+      - name: Send Discord Notification (Online)
         if: steps.ping.outputs.status == 'online'
-        env:
-          TIMESTAMP: ${{ steps.time.outputs.timestamp }}
-          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d "$(jq -n --arg time "$TIMESTAMP" '{
-                 embeds: [{
-                   title: "🟢 Service Status: Online",
-                   description: "Artemis is online as of **\($time)**.",
-                   color: 3066993
-                 }]
-               }')" \
-               "$WEBHOOK_URL"
+               -d "{\"content\": \"Artemis is online as of ${{ steps.time.outputs.timestamp }}.\"}" \
+               "${{ secrets.DISCORD_WEBHOOK_URL }}"
 
-      - name: Send Discord Embed (Offline)
+      - name: Send Discord Notification (Offline)
         if: steps.ping.outputs.status != 'online'
-        env:
-          TIMESTAMP: ${{ steps.time.outputs.timestamp }}
-          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d "$(jq -n --arg time "$TIMESTAMP" '{
-                 embeds: [{
-                   title: "🔴 Service Status: Offline",
-                   description: "Artemis is offline as of **\($time)**.",
-                   color: 15158332
-                 }]
-               }')" \
-               "$WEBHOOK_URL"
+               -d "{\"content\": \"Artemis is offline as of ${{ steps.time.outputs.timestamp }}.\"}" \
+               "${{ secrets.DISCORD_WEBHOOK_URL }}"
