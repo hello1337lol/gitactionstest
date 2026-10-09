@@ -1,0 +1,57 @@
+name: Check Artemis Status
+
+on:
+  schedule:
+    # Runs every 15 minutes (adjust as needed)
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  check-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Artemis
+        id: ping
+        continue-on-error: true
+        run: |
+          RESPONSE=$(curl -s --max-time 10 https://artemis.cockatoo-dory.ts.net/ping)
+          echo "Response received: '$RESPONSE'"
+          
+          if [ "$RESPONSE" = "pong" ]; then
+            echo "status=online" >> $GITHUB_OUTPUT
+          else
+            echo "status=offline" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Get Current Time
+        id: time
+        run: |
+          echo "timestamp=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+
+      - name: Send Discord Embed (Online)
+        if: steps.ping.outputs.status == 'online'
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                 "embeds": [{
+                   "title": "🟢 Service Status: Online",
+                   "description": "Artemis is online as of **'${{ steps.time.outputs.timestamp }}'**.",
+                   "color": 3066993
+                 }]
+               }' \
+               "${{ secrets.DISCORD_WEBHOOK_URL }}"
+
+      - name: Send Discord Embed (Offline)
+        if: steps.ping.outputs.status != 'online'
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                 "embeds": [{
+                   "title": "🔴 Service Status: Offline",
+                   "description": "Artemis is offline as of **'${{ steps.time.outputs.timestamp }}'**.",
+                   "color": 15158332
+                 }]
+               }' \
+               "${{ secrets.DISCORD_WEBHOOK_URL }}"
