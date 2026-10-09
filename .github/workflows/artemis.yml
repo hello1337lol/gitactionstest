@@ -30,28 +30,34 @@ jobs:
 
       - name: Send Discord Embed (Online)
         if: steps.ping.outputs.status == 'online'
+        env:
+          TIMESTAMP: ${{ steps.time.outputs.timestamp }}
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d '{
-                 "embeds": [{
-                   "title": "🟢 Service Status: Online",
-                   "description": "Artemis is online as of **'${{ steps.time.outputs.timestamp }}'**.",
-                   "color": 3066993
+               -d "$(jq -n --arg time "$TIMESTAMP" '{
+                 embeds: [{
+                   title: "🟢 Service Status: Online",
+                   description: "Artemis is online as of **\($time)**.",
+                   color: 3066993
                  }]
-               }' \
-               "${{ secrets.DISCORD_WEBHOOK_URL }}"
+               }')" \
+               "$WEBHOOK_URL"
 
       - name: Send Discord Embed (Offline)
         if: steps.ping.outputs.status != 'online'
+        env:
+          TIMESTAMP: ${{ steps.time.outputs.timestamp }}
+          WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           curl -H "Content-Type: application/json" \
                -X POST \
-               -d '{
-                 "embeds": [{
-                   "title": "🔴 Service Status: Offline",
-                   "description": "Artemis is offline as of **'${{ steps.time.outputs.timestamp }}'**.",
-                   "color": 15158332
+               -d "$(jq -n --arg time "$TIMESTAMP" '{
+                 embeds: [{
+                   title: "🔴 Service Status: Offline",
+                   description: "Artemis is offline as of **\($time)**.",
+                   color: 15158332
                  }]
-               }' \
-               "${{ secrets.DISCORD_WEBHOOK_URL }}"
+               }')" \
+               "$WEBHOOK_URL"
