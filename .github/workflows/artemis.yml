@@ -33,7 +33,7 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X PATCH \
-               -d "{\"content\": \"Artemis is online as of <t:${{ steps.time.outputs.timestamp }}:R>.\"}" \
+               -d "{\"content\": \"Artemis is 🟩 **online** 🟩 as of <t:${{ steps.time.outputs.timestamp }}:R>.\"}" \
                "${{ secrets.DISCORD_WEBHOOK_URL }}/messages/1560454288382230680"
 
       - name: Update Discord Notification (Offline)
@@ -41,5 +41,5 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X PATCH \
-               -d "{\"content\": \"Artemis is offline as of <t:${{ steps.time.outputs.timestamp }}:R>.\"}" \
+               -d "{\"content\": \"Artemis is 🟥 **offline** 🟥 as of <t:${{ steps.time.outputs.timestamp }}:R>.\"}" \
                "${{ secrets.DISCORD_WEBHOOK_URL }}/messages/1560454288382230680"
