@@ -28,18 +28,18 @@ jobs:
         run: |
           echo "timestamp=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
 
-      - name: Send Discord Notification (Online)
+      - name: Update Discord Notification (Online)
         if: steps.ping.outputs.status == 'online'
         run: |
           curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"Artemis is online as of ${{ steps.time.outputs.timestamp }}.\"}" \
-               "${{ secrets.DISCORD_WEBHOOK_URL }}"
+               -X PATCH \
+               -d "{\"content\": \"Artemis is 🟩 **online** 🟩 as of ${{ steps.time.outputs.timestamp }}.\"}" \
+               "${{ secrets.DISCORD_WEBHOOK_URL }}/messages/1560454288382230680"
 
-      - name: Send Discord Notification (Offline)
+      - name: Update Discord Notification (Offline)
         if: steps.ping.outputs.status != 'online'
         run: |
           curl -H "Content-Type: application/json" \
-               -X POST \
-               -d "{\"content\": \"Artemis is offline as of ${{ steps.time.outputs.timestamp }}.\"}" \
-               "${{ secrets.DISCORD_WEBHOOK_URL }}"
+               -X PATCH \
+               -d "{\"content\": \"Artemis is 🟥 **offline** 🟥 as of ${{ steps.time.outputs.timestamp }}.\"}" \
+               "${{ secrets.DISCORD_WEBHOOK_URL }}/messages/1560454288382230680"
