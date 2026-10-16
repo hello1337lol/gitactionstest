@@ -23,17 +23,17 @@ jobs:
             echo "status=offline" >> $GITHUB_OUTPUT
           fi
 
-      - name: Get Current Time
+      - name: Get Unix Timestamp
         id: time
         run: |
-          echo "timestamp=$(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date +%s)" >> $GITHUB_OUTPUT
 
       - name: Update Discord Notification (Online)
         if: steps.ping.outputs.status == 'online'
         run: |
           curl -H "Content-Type: application/json" \
                -X PATCH \
-               -d "{\"content\": \"Artemis is 🟩 **online** 🟩 as of ${{ steps.time.outputs.timestamp }}.\"}" \
+               -d "{\"content\": \"Artemis is online as of <t:${{ steps.time.outputs.timestamp }}:R>.\"}" \
                "${{ secrets.DISCORD_WEBHOOK_URL }}/messages/1560454288382230680"
 
       - name: Update Discord Notification (Offline)
@@ -41,5 +41,5 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
                -X PATCH \
-               -d "{\"content\": \"Artemis is 🟥 **offline** 🟥 as of ${{ steps.time.outputs.timestamp }}.\"}" \
+               -d "{\"content\": \"Artemis is offline as of <t:${{ steps.time.outputs.timestamp }}:R>.\"}" \
                "${{ secrets.DISCORD_WEBHOOK_URL }}/messages/1560454288382230680"
